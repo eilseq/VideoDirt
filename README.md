@@ -1,13 +1,13 @@
 # VideoDirt
 ## experimental video playback for live coding environments'
-
-##### Filippo Guida, 2016
-###### [filippoguida.cc](filippoguida.cc)
+##### Filippo Guida, 2016 | [filippoguida.cc](filippoguida.cc)
 
 ## Overview
+
 VideoDirt is a software application enabling users to the create and manipulate video contents in realtime through pattern-oriented live coding languages. Written in Java it is based on the Processing library, that can be also used as external library in Processing sketches. It is capable of receiving OSC messages coming from Tidal language and use them to mix and manipulate video contents from a media-library. The video decoder is based on GStreamer, a cross-platform native library that allow the application to decode any kind of video codec and work at best performances.
 
 ## Functionalities
+
 VideoDirt functionalities are made in order to limit language changes to a minimum. So it offer basically the
 same parameters to each event, without the ones related to audio effects:
 
@@ -53,9 +53,10 @@ the clips in place. This list is still growing:
 - ...
 
 ## Classes
+
 The whole software is made three main classes, that represents the Processing library:
 
-• VideoLibrary:
+### VideoLibrary:
 A static class that collect all the videoclips file patches and provide it to the OSC interpreter:
 
 ~~~~ {.java}
@@ -72,14 +73,14 @@ public class VideoLibrary {
 }
 
 
-• VideoClip:
+### VideoClip:
 This class offer all the base video functionalities, inherited from the standard Movie (processing.video),
 and decode the incoming OSC-message in order to set the next clip in place as described.
 The application create a VideoClip instance for each incoming message, that will be disposed once playback has finished.
 
 ~~~~ {.java}
 public class VideoClip extends Movie {
-
+...
 	VideoClip(PApplet parent, Object[] osc_args) {
 		super(parent, VideoLibrary.getFilename(osc_args));
 		decodeOSC(args);
@@ -93,14 +94,14 @@ public class VideoClip extends Movie {
 }
 ~~~~
 
-• VideoPlayer:
+### VideoPlayer:
 This class provide multi-threading functionalities to manage the high frequency of VideoClip creation.
 Each VideoPlayer instance create and manage a single VideoClip instance in a different thread where are performed all
 the operation directly connected to messages interpretation and clip setup, in order to save resources and increase performances:
 
 ~~~~ {.java}
 public class VideoPlayer implements Runnable {
-  ...
+...
 	public void run() {
 		clip = new VideoClip(parent, args);
 		clip.play();
@@ -112,28 +113,44 @@ public class VideoPlayer implements Runnable {
 }
 ~~~~
 
-• VideoDirt:
+### VideoDirt:
 A singleton class collecting all the functionalities. This one can be imported into a Processing sketch as external library
 and used to print all the video clips alongside other graphic materials defined inside the sketch itself:
 
 ~~~~ {.java}
-  import videodirt.VideoDirt;
+import videodirt.VideoDirt;
 
-	public void settings() {
-		size(640, 360, P3D);      //be sure to set P3D renderer
-	}
+public void settings() {
+	size(640, 360, P3D);      //be sure to set P3D renderer
+}
 
-	public void setup() {
-		VideoDirt.init(this, "./dirt-samples");
-		textureMode(NORMAL);      //be sure to set normal texture mode
-	}
+public void setup() {
+	VideoDirt.init(this, "./dirt-samples");
+	textureMode(NORMAL);      //be sure to set normal texture mode
+}
 
-	public void draw() {
-		background(0);
-		VideoDirt.display();
-
-    /*
-      perform other graphic operations here
-    */
-	}
+public void draw() {
+	background(0);
+	VideoDirt.display();
+    	
+	/* perform other graphic operations here */
+}
 ~~~~
+
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
+
+## Version
+
+1.0.0
+
+## Authors
+
+* **Filippo Guida** - *Initial work* - [filippoguida.cc](filippoguida.cc)
+
+See also the list of [contributors](https://github.com/filippoguida/VideoDirt/contributors) who participated in this project.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details

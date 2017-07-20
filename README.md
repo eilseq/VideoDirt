@@ -11,45 +11,45 @@ VideoDirt is a software application enabling users to the create and manipulate 
 VideoDirt functionalities are made in order to limit language changes to a minimum. So it offer basically the
 same parameters to each event, without the ones related to audio effects:
 
-- s:        name of the pointed folder
-- n:        index of the pointed sample
-- sustain:  the duration of the sound in seconds. If don't set, will be used the natural duration of sample.
-- begin:    skips the beginning of each sample, shortening them.
-- end:      cuts the end of samples, shortening them.
-- legato:   inter-onset time between events, in relation to sustain. If don't set, will be played the whole sample.
-- cut:      set the cut-group. Every sample the same group will be forced stopped.
-- speed:    speed of sample player
-- unit:     controls how the speed parameter is interpreted. (see Tidal reference)
+- **s**:        name of the pointed folder
+- **n**:        index of the pointed sample
+- **sustain**:  the duration of the sound in seconds. If don't set, will be used the natural duration of sample.
+- **begin**:    skips the beginning of each sample, shortening them.
+- **end**:      cuts the end of samples, shortening them.
+- **legato**:   inter-onset time between events, in relation to sustain. If don't set, will be played the whole sample.
+- **cut**:      set the cut-group. Every sample the same group will be forced stopped.
+- **speed**:    speed of sample player
+- **unit**:     controls how the speed parameter is interpreted. (see Tidal reference)
 
 The presence of this basic parameters allow VideoDirt to address messages coming from the sample transformer functions
 provided by Tidal, applying the same effect to video clips:
 
-- loopAt:   makes sample fit the given number of cycles.
-- chop:     turn a pattern of samples into a pattern of sample parts.
-- gap:      similar to chop, but only the sample in place is played.
-- striate:  kind of granulator, cutting samples into bits and interlacing it together.
-- striateL: just like striate, but also loops each sample chunk a number of times specified.
-- stut:     applies a type of delay to a pattern.
+- **loopAt**:   makes sample fit the given number of cycles.
+- **chop**:     turn a pattern of samples into a pattern of sample parts.
+- **gap**:      similar to chop, but only the sample in place is played.
+- **striate**:  kind of granulator, cutting samples into bits and interlacing it together.
+- **striateL**: just like striate, but also loops each sample chunk a number of times specified.
+- **stut**:     applies a type of delay to a pattern.
 
 In addition to the parameters mentioned above, more have been added to manage basic video manipulations in order to
 manage the presence of multiple clips simultaneously. All the videos are printed as texture of plane shapes inside a
 3D environment, so each clip has 2 parameter to manage the size:
 
-- xsize:    horizontal size of clip, normalized between 0 and 1 in relation to the window size.
-- ysize:    vertical size of clip, normalized between 0 and 1 in relation to the window size.
+- **xsize**:    horizontal size of clip, normalized between 0 and 1 in relation to the window size.
+- **ysize**:    vertical size of clip, normalized between 0 and 1 in relation to the window size.
 
 and 3 parameters to manage its position:
 
-- xpos:     horizontal position of clip inside the window, normalized between -1 and 1 from the center.
-- ypos:     vertical position of clip inside the window, normalized between -1 and 1 from the center.
-- zpos:     Z-axis position, not normalized. Useful to manage video layers and create zoom in/out effects.
+- **xpos**:     horizontal position of clip inside the window, normalized between -1 and 1 from the center.
+- **ypos**:     vertical position of clip inside the window, normalized between -1 and 1 from the center.
+- **zpos**:     Z-axis position, not normalized. Useful to manage video layers and create zoom in/out effects.
 
 There are also some features that provide color, light and compositing effects needs to mix together all
 the clips in place. This list is still growing:
 
-- opacity:   describes the transparency-level, where 1 is not transparent at all and 0 is completely transparent.
-- exposure:  set the amount of light per unit area, normalized between 0 and 1.
-- cutcolor:  cut a selected color from the video. Useful to cut subject from a green screen.
+- **opacity**:   describes the transparency-level, where 1 is not transparent at all and 0 is completely transparent.
+- **exposure**:  set the amount of light per unit area, normalized between 0 and 1.
+- **cutcolor**:  cut a selected color from the video. Useful to cut subject from a green screen.
 - ...
 
 ## Classes
@@ -71,7 +71,7 @@ public class VideoLibrary {
 	}
   ...
 }
-
+~~~~ 
 
 ### VideoClip:
 This class offer all the base video functionalities, inherited from the standard Movie (processing.video),

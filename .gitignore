@@ -7,6 +7,9 @@
 # IntelliJ IDEA files
 *.idea
 
+# User Libraries
+*.jar
+
 # Package Files #
 *.war
 *.ear
@@ -16,7 +19,6 @@
 *.iml
 
 # Project Folders #
-bin/
 lib/
 data/
 out/

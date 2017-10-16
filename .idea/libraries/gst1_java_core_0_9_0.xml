@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="gst1-java-core-0.9.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/user/gst1-java/gst1-java-core-0.9.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

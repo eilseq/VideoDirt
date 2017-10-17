@@ -1,9 +1,11 @@
 # Log file
 *.log
 
+# Compiled Classes #
+*.class
+
 # IntelliJ IDEA files
-*.idea/
-*.idea/libraries/
+*.idea
 
 # Package Files #
 *.war
@@ -12,12 +14,7 @@
 *.tar.gz
 *.rar
 *.iml
-
-# External Libraries #
-lib/**/*.jar
-
-# Compiled Classes #
-out/**/*.class
+*.jar
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*

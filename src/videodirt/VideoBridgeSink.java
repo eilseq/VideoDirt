@@ -29,7 +29,10 @@ class VideoBridgeSink extends Bin {
     VideoBridgeSink(VideoPlane plane) {
         super();
         this.plane = plane;
+        init();
+    }
 
+    private void init() {
         //enable new_sample signal and connect a listener to it
         sink = (AppSink) ElementFactory.make("appsink", "sink");
         sink.set("emit-signals", true);

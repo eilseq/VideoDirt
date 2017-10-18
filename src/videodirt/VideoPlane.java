@@ -2,11 +2,11 @@ package videodirt;
 
 import processing.core.PConstants;
 import processing.core.PImage;
-
 import java.nio.IntBuffer;
 
 class VideoPlane extends PImage {
 
+    private VideoClip clip;
     private boolean active;
     private int lastWidth;
     private int lastHeight;
@@ -32,5 +32,13 @@ class VideoPlane extends PImage {
 
     boolean isActive() {
         return active;
+    }
+
+    void connectClip(VideoClip clip) {
+        this.clip = clip;
+    }
+
+    VideoClip getConnectedClip() {
+        return clip;
     }
 }

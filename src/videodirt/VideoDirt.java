@@ -2,122 +2,145 @@ package videodirt;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.ArrayList;
+import java.util.concurrent.*;
 
 import org.freedesktop.gstreamer.Gst;
 import oscP5.*;
-import processing.core.PApplet;
-import processing.core.PGraphics;
-import processing.core.PImage;
+import processing.core.*;
 
 public class VideoDirt {
 
-    //GStreamer initialization
+    private static final String DEFAULT_IP_ADDRESS = "127.0.0.1";
+    private static final int DEFAULT_OSC_PORT = 7772;
+    private static final String DEFAULT_LIB_DIR = "./data";
+    private static final int MAX_OVERLAP = 4;
+
+    private static final ThreadPoolExecutor playerPool;
     static {
+        //initialize gstreamer
         Gst.init();
+
+        //set concurrency rules (reject tasks after max player overlap)
+        playerPool = new ThreadPoolExecutor(1, MAX_OVERLAP,60L, TimeUnit.SECONDS,
+                new SynchronousQueue<Runnable>());
+
+        //define rejected task behaviour
+        playerPool.setRejectedExecutionHandler((r, executor) ->
+                PGraphics.showWarning("VideoDirt: task rejected, event frequency too high "));
     }
 
-    //class definition
-    private static final int MAX_OVERLAP = 4;
-    private static VideoPlane[] videoplanes = new VideoPlane[MAX_OVERLAP];
-    private OscP5 osc_receiver;
+    //singleton
+    private static VideoDirt instance;
     private PApplet parent;
+    private String lib_dir;
+    private OscP5 osc_receiver;
+    private ArrayList<VideoPlane> videoplanes;
+    private int plane_token;
     private Method drawFrameMethod;
-    public VideoDirt(PApplet parent, OscP5 osc_receiver) {
-        //set instance field
-        this.parent = parent;
-        this.osc_receiver = osc_receiver;
 
-        //create videoplanes
-        for (int i = 0; i < MAX_OVERLAP; i++) videoplanes[i] = new VideoPlane();
+    public VideoDirt(PApplet parent) {
+        this(parent, DEFAULT_LIB_DIR);
+    }
+
+    public VideoDirt(PApplet parent, String lib_dir) {
+        this(parent, lib_dir, new OscP5(parent, DEFAULT_IP_ADDRESS, DEFAULT_OSC_PORT, OscP5.UDP));
+    }
+
+    public VideoDirt(PApplet parent, String lib_dir, OscP5 osc_receiver) {
+        if(instance == null) {
+            this.parent = parent;
+            this.lib_dir = lib_dir;
+            this.osc_receiver = osc_receiver;
+
+            //initialize unique instance
+            init();
+            instance = this;
+        } else {
+            PGraphics.showWarning("VideoDirt: unique instance already defined");
+        }
+    }
+
+    private void init() {
+        //create empty video-planes
+        videoplanes = new ArrayList<>();
+        for(int i = 0; i < MAX_OVERLAP; i++) videoplanes.add(new VideoPlane());
+
+        //load library
+        if (!VideoLibrary.loaded())
+            VideoLibrary.load(lib_dir);
 
         //get drawFrame method declared in PApplet
         try {
-            drawFrameMethod = parent.getClass().getDeclaredMethod("drawFrame", PImage.class);
+            drawFrameMethod = parent.getClass().getDeclaredMethod("drawFrame", PImage.class, int.class, int.class);
             drawFrameMethod.setAccessible(true);
         } catch (NoSuchMethodException e) {
-            PGraphics.showWarning("drawFrame(PImage frame) method missing");
+            //report issue and exit
+            PGraphics.showMethodWarning("VideoDirt: method 'drawFrame(PImage frame, int x, int y)' must be defined");
+            parent.exit();
         }
-    }
 
-    //singleton initialization
-    private static VideoDirt instance;
+        //define stop() method
+        parent.registerMethod("stop", this);
 
-    public static void start(PApplet parent) {
-        //folder ./data by default
-        VideoDirt.start(parent, "./data");
-    }
-
-    public static void start(PApplet parent, String library_dir) {
-        //port 7772 by default
-        VideoDirt.start(parent, library_dir, 7772);
-    }
-
-    public static void start(PApplet parent, String library_dir, int udpPort) {
-        //localhost address by default
-        VideoDirt.start(parent, library_dir, "127.0.0.1", udpPort);
-    }
-
-    public static void start(PApplet parent, String library_dir, String netAddress, int udpPort) {
-        if (instance == null) {
-            instance = new VideoDirt(parent, new OscP5(parent, netAddress, udpPort, OscP5.UDP));
-            instance.osc_receiver.addListener(new OscEventListener() {
-                @Override
-                public void oscEvent(OscMessage msg) {
-                    if (msg.checkAddrPattern("/playVideo") && VideoLibrary.loaded()) {
-                        int index = playerCount.get() % MAX_OVERLAP;
-                        playerPool.execute(new VideoPlayer(instance.parent, msg.arguments(), videoplanes[index]));
-                    }
+        //set osc listener
+        osc_receiver.addListener(new OscEventListener() {
+            //every osc event on root /playVideo launch a new video player instance
+            @Override
+            public void oscEvent(OscMessage msg) {
+                if (msg.checkAddrPattern("/playVideo")) {
+                    VideoClip clip = new VideoClip(msg.arguments());
+                    VideoPlane plane = videoplanes.get(plane_token % MAX_OVERLAP);
+                    playerPool.execute(new VideoPlayer(clip, plane));
+                    plane_token++;
                 }
+            }
+            @Override
+            public void oscStatus(OscStatus theStatus) {
+                System.out.println(theStatus);
+            }
+        });
+    }
 
-                @Override
-                public void oscStatus(OscStatus theStatus) {
-                    System.out.println(theStatus);
+    public void display() {
+        //add graphics
+        videoplanes.forEach((plane) -> {
+            if (plane.isActive()) {
+                //evaluate incoming graphics changes
+                VideoClip clip = plane.getConnectedClip();
+
+                //resize
+                int width = (int)(parent.displayWidth*clip.getSize());
+                int height = (int)(parent.displayHeight*clip.getSize());
+                plane.resize(width, height);
+
+                //set blendmode & opacity
+                parent.blendMode(clip.getBlendmode());
+                parent.tint(255, clip.getOpacity()*255);
+
+                //launch drawFrame in parent context
+                try {
+                    drawFrameMethod.invoke(parent,
+                            plane,
+                            (int)(parent.displayWidth*clip.getXPos()),
+                            (int)(parent.displayHeight*clip.getYpos())
+                    );
+                } catch (NullPointerException
+                        | IllegalAccessException
+                        | IllegalArgumentException
+                        | InvocationTargetException e) {
+                    //jump operations
                 }
-            });
-        }
+            }
+        });
 
-        if (!VideoLibrary.loaded())
-            VideoLibrary.load(library_dir);
+        //restore blendmode & opacity
+        parent.blendMode(PConstants.NORMAL);
     }
 
-
-    //concurrency rules and static buffers definition
-    private static final Semaphore playerSemaphore = new Semaphore(MAX_OVERLAP);
-    private static final BlockingQueue<Runnable> playerQueue = new ArrayBlockingQueue<>(MAX_OVERLAP);
-    private static AtomicInteger playerCount = new AtomicInteger();
-    private static final ThreadPoolExecutor playerPool = new ThreadPoolExecutor(1, MAX_OVERLAP, 50, TimeUnit.MILLISECONDS, playerQueue) {
-        public void execute(Runnable r) {
-            try {
-                playerSemaphore.acquire();
-                playerCount.incrementAndGet();
-                super.execute(r);
-            } catch (InterruptedException e) {/*do nothing*/}
-        }
-
-        public void afterExecute(Runnable r, Throwable t) {
-            playerSemaphore.release();
-            super.afterExecute(r, t);
-        }
-    };
-
-    //static methods
-    public static void display() {
-        try {
-
-            for (int i = 0; i < MAX_OVERLAP; i++)
-                if (videoplanes[i].isActive())
-                    instance.drawFrameMethod.invoke(instance.parent, videoplanes[i]);
-
-        } catch (NullPointerException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            //jump VideoDirt operations
-        }
+    public void stop() throws InterruptedException {
+        Gst.quit();
+        playerPool.shutdown();
+        playerPool.awaitTermination(1L, TimeUnit.SECONDS);
     }
-
-
 }

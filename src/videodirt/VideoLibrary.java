@@ -35,26 +35,14 @@ class VideoLibrary {
         loaded = true;
     }
 
-    static File getFile(Object[] args) {
+    static File getFile(VideoClip clip) {
 
         if (!loaded) return null;
 
-        String dir = null;
-        int indx = 0;
-        for (int i = 0; i < args.length; i++) {
-            switch (args[i].toString()) {
-                case "s":
-                    dir = (String) args[i + 1];
-                    break;
-                case "n":
-                    indx = (int) args[i + 1];
-                    break;
-            }
-        }
-
+        int indx = clip.getNum();
         StringBuilder dir_path = new StringBuilder(library_path.toString());
         dir_path.append("/");
-        dir_path.append(dir);
+        dir_path.append(clip.getDir());
 
         try {
             return new File(library.get(Paths.get(dir_path.toString())).get(indx).toString());

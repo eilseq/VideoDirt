@@ -16,7 +16,7 @@ same parameters to each event, without the ones related to audio effects:
 - **sustain**:  the duration of the sound in seconds. If don't set, will be used the natural duration of sample.
 - **begin**:    skips the beginning of each sample, shortening them.
 - **end**:      cuts the end of samples, shortening them.
-- **legato**:   inter-onset time between events, in relation to sustain. If don't set, will be played the whole sample.
+- **legato**:   inter-onset time between events. If don't set, will be played the whole sample.
 - **cut**:      set the cut-group. Every sample the same group will be forced stopped.
 - **speed**:    speed of sample player
 - **unit**:     controls how the speed parameter is interpreted. (see Tidal reference)
@@ -151,6 +151,13 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 
 See also the list of [contributors](https://github.com/filippoguida/VideoDirt/contributors) who participated in this project.
 
+## Dependencies
+
+* [https://github.com/java-native-access/jna]**Java Native Library**
+* [https://github.com/gstreamer-java/gst1-java-core]**GStreamer Java Bind**
+* [https://github.com/processing/processing]**Processing Java**
+
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the GNU Lesser General Public License v3.0
+- see the [LICENSE.md](LICENSE.md) file for details -

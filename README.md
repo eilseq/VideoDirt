@@ -1,5 +1,5 @@
 # VideoDirt
-## experimental video playback
+## Experimental Video Playback
 ##### Filippo Guida, 2016 | [filippoguida.cc](filippoguida.cc)
 
 ## Overview

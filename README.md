@@ -1,5 +1,5 @@
 # VideoDirt
-## experimental video playback for live coding environments'
+## experimental video playback
 ##### Filippo Guida, 2016 | [filippoguida.cc](filippoguida.cc)
 
 ## Overview

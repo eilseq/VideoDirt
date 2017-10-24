@@ -1,0 +1,5 @@
+import VideoDirt
+(v1,vt1) <- videoDirtSetters getNow
+
+v1 $ sound "clip"    //first file located in clip folder
+v1 $ sound "clip:2"  //second file located in clip folder

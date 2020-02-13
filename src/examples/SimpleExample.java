@@ -5,8 +5,8 @@ import videodirt.VideoDirt;
 
 public class SimpleExample extends PApplet {
 
-    VideoDirt videodirt  = new VideoDirt(this, "/Users/filippoguida/Desktop/Shadows/videoclips");
-	
+  VideoDirt videodirt  = new VideoDirt(this, "your/library/folder");
+
 	public void settings() {
 	    size(960, 540, P3D);
 	}
@@ -16,10 +16,10 @@ public class SimpleExample extends PApplet {
         videodirt.display();
 	}
 
-    public void drawFrame(PImage frame, int x, int y) {
-        image(frame, x, y);
-    }
-	
+  public void drawFrame(PImage frame, int x, int y) {
+      image(frame, x, y);
+  }
+
 	public static void main(String _args[]) {
 	    PApplet.main(new String[] { SimpleExample.class.getName() });
 	}
